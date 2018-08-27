@@ -24,6 +24,7 @@
 #include <errno.h>
 
 #include <osmocom/core/msgb.h>
+#include <osmocom/codec/codec.h>
 
 #include <osmocom/bb/common/osmocom_data.h>
 #include <osmocom/bb/mobile/settings.h>
@@ -103,13 +104,34 @@ int gsm_send_voice(struct osmocom_ms *ms, struct msgb *msg)
 
 int gsm_send_voice_mncc(struct osmocom_ms *ms, struct gsm_data_frame *frame)
 {
+	unsigned int frame_len;
 	struct msgb *nmsg;
 
-	nmsg = msgb_alloc_headroom(33 + 64, 64, "TCH/F");
+	/* Determine frame length */
+	switch (frame->msg_type) {
+	case GSM_TCHF_FRAME:
+		frame_len = GSM_FR_BYTES;
+		break;
+	case GSM_TCHF_FRAME_EFR:
+		frame_len = GSM_EFR_BYTES;
+		break;
+	case GSM_TCHH_FRAME:
+		frame_len = GSM_HR_BYTES;
+		break;
+	case GSM_TCH_FRAME_AMR:
+	default:
+		/* TODO: add some logging here */
+		return -ENOTSUP;
+	}
+
+	/* Allocate a message for the lower layers */
+	nmsg = msgb_alloc_headroom(frame_len + 64, 64, "TCH frame");
 	if (!nmsg)
 		return -ENOMEM;
-	nmsg->l2h = msgb_put(nmsg, 33);
-	memcpy(nmsg->l2h, frame->data, 33);
+
+	/* Copy payload from a frame */
+	nmsg->l2h = msgb_put(nmsg, frame_len);
+	memcpy(nmsg->l2h, frame->data, frame_len);
 
 	return gsm_send_voice(ms, nmsg);
 }
