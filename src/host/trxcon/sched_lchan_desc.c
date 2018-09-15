@@ -300,4 +300,10 @@ const struct trx_lchan_desc trx_lchan_desc[_TRX_CHAN_MAX] = {
 		4 * GSM_BURST_PL_LEN,	TRX_CH_FLAG_PDCH,
 		rx_data_fn,		tx_data_fn,
 	},
+	[TRXC_CBCH] = {
+		TRXC_CBCH,		"CBCH",
+		0xc8,			TRX_CH_LID_DEDIC,
+		4 * GSM_BURST_PL_LEN,	TRX_CH_FLAG_AUTO,
+		rx_data_fn,		NULL,
+	},
 };

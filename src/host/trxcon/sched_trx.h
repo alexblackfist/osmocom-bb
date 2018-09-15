@@ -83,6 +83,7 @@ enum trx_lchan_type {
 	TRXC_SACCH8_7,
 	TRXC_PDTCH,
 	TRXC_PTCCH,
+	TRXC_CBCH,
 	_TRX_CHAN_MAX
 };
 
